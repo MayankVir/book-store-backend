@@ -1,5 +1,9 @@
 import { BookRepository } from "../repositories/bookRepository";
 
+import ErrorHandler from '../utils/errorHandling';
+import en from '../locales/en.json';
+import fr from '../locales/fr.json';
+
 import { books } from "../constants";
 
 const bookRepository = new BookRepository();
@@ -10,8 +14,12 @@ export class BookService {
       const book = books.find((book) => book.id === bookId);
       const user = await bookRepository.getUserById(userId);
 
-      if (!book || !user || user.balance < book.price) {
-        return false;
+      if (!book || !user) {
+        return false; // Book or user not found
+      }
+      if (user.balance < book.price) {
+        const errorMessage = user.locale === 'fr' ? fr.errors.insufficientBalance : en.errors.insufficientBalance;
+        throw new Error(errorMessage);
       }
 
       user.balance -= book.price;
@@ -19,6 +27,7 @@ export class BookService {
 
       return true;
     } catch (error) {
+      ErrorHandler.logError(error, 'BookService.buyBook');
       throw error;
     }
   }
