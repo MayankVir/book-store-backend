@@ -15,7 +15,7 @@ export class BookService {
       }
 
       user.balance -= book.price;
-      await bookRepository.updateUserBalance(userId, user.balance);
+      await bookRepository.updateUserBalance(userId, user.balance, user.isNew);
 
       return true;
     } catch (error) {
